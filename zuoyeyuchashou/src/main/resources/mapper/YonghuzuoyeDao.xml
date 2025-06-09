@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.YonghuzuoyeDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.zuoye_id as zuoyeId
+        ,a.yonghu_id as yonghuId
+        ,a.yonghuzuoye_file as yonghuzuoyeFile
+        ,a.insert_time as insertTime
+        ,a.yonghuzuoye_fenshu as yonghuzuoyeFenshu
+        ,a.yonghuzuoye_content as yonghuzuoyeContent
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.YonghuzuoyeView" >
+        SELECT
+        <include refid="Base_Column_List" />
+
+--         级联表的字段
+        ,yonghu.yonghu_name as yonghuName
+        ,yonghu.yonghu_phone as yonghuPhone
+        ,yonghu.yonghu_id_number as yonghuIdNumber
+        ,yonghu.yonghu_photo as yonghuPhoto
+        ,yonghu.sex_types as sexTypes
+        ,yonghu.xueyuanzhuanye_types as xueyuanzhuanyeTypes
+        ,zuoye.laoshi_id as laoshiId
+        ,zuoye.zuoye_name as zuoyeName
+        ,zuoye.zuoye_types as zuoyeTypes
+        ,zuoye.zuoye_file as zuoyeFile
+        ,zuoye.zuoye_end_time as zuoyeEndTime
+        ,zuoye.zuoye_content as zuoyeContent
+
+        FROM yonghuzuoye  a
+        left JOIN yonghu yonghu ON a.yonghu_id = yonghu.id
+        left JOIN zuoye zuoye ON a.zuoye_id = zuoye.id
+
+        <where>
+            <if test="params.zuoyeId != null">
+                and a.zuoye_id = #{params.zuoyeId}
+            </if>
+            <if test="params.yonghuId != null">
+                and a.yonghu_id = #{params.yonghuId}
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+            <if test="params.yonghuzuoyeFenshuStart != null">
+                <![CDATA[  and a.yonghuzuoye_fenshu >= #{params.yonghuzuoyeFenshuStart}   ]]>
+            </if>
+            <if test="params.yonghuzuoyeFenshuEnd != null">
+                <![CDATA[  and a.yonghuzuoye_fenshu <= #{params.yonghuzuoyeFenshuEnd}   ]]>
+            </if>
+            <if test=" params.yonghuzuoyeContent != '' and params.yonghuzuoyeContent != null and params.yonghuzuoyeContent != 'null' ">
+                and a.yonghuzuoye_content like CONCAT('%',#{params.yonghuzuoyeContent},'%')
+            </if>
+
+            <if test=" params.yonghuName != '' and params.yonghuName != null and params.yonghuName != 'null' ">
+                and yonghu.yonghu_name like CONCAT('%',#{params.yonghuName},'%')
+            </if>
+            <if test=" params.yonghuPhone != '' and params.yonghuPhone != null and params.yonghuPhone != 'null' ">
+                and yonghu.yonghu_phone like CONCAT('%',#{params.yonghuPhone},'%')
+            </if>
+            <if test=" params.yonghuIdNumber != '' and params.yonghuIdNumber != null and params.yonghuIdNumber != 'null' ">
+                and yonghu.yonghu_id_number like CONCAT('%',#{params.yonghuIdNumber},'%')
+            </if>
+            <if test="params.sexTypes != null">
+                and yonghu.sex_types = #{params.sexTypes}
+            </if>
+
+            <if test="params.xueyuanzhuanyeTypes != null">
+                and yonghu.xueyuanzhuanye_types = #{params.xueyuanzhuanyeTypes}
+            </if>
+
+            <if test="params.laoshiId != null">
+                and zuoye.laoshi_id = #{params.laoshiId}
+            </if>
+            <if test=" params.zuoyeName != '' and params.zuoyeName != null and params.zuoyeName != 'null' ">
+                and zuoye.zuoye_name like CONCAT('%',#{params.zuoyeName},'%')
+            </if>
+            <if test="params.zuoyeTypes != null">
+                and zuoye.zuoye_types = #{params.zuoyeTypes}
+            </if>
+
+            <if test=" params.zuoyeEndTimeStart != '' and params.zuoyeEndTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(zuoye.zuoye_end_time) >= UNIX_TIMESTAMP(#{params.zuoyeEndTimeStart}) ]]>
+            </if>
+            <if test=" params.zuoyeEndTimeEnd != '' and params.zuoyeEndTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(zuoye.zuoye_end_time) <= UNIX_TIMESTAMP(#{params.zuoyeEndTimeEnd}) ]]>
+            </if>
+            <if test=" params.zuoyeContent != '' and params.zuoyeContent != null and params.zuoyeContent != 'null' ">
+                and zuoye.zuoye_content like CONCAT('%',#{params.zuoyeContent},'%')
+            </if>
+        </where>
+        order by a.${params.orderBy} desc
+    </select>
+
+</mapper>
